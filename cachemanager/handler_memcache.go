@@ -3,14 +3,16 @@ package cachemanager
 import (
 	"strings"
 
+	"time"
+
 	"github.com/bradfitz/gomemcache/memcache"
 )
 
 // NewHandlerMemcache creates a memcache handler
-func NewHandlerMemcache(servers string, prefix string, ttl int32) Handler {
+func NewHandlerMemcache(servers string, prefix string, ttl time.Duration) Handler {
 	return &handlerMemcache{
 		client: memcache.New(strings.Split(servers, ",")...),
-		handlerBase: handlerBase{
+		handler: handler{
 			prefix: prefix,
 			ttl:    ttl,
 		},
@@ -19,12 +21,12 @@ func NewHandlerMemcache(servers string, prefix string, ttl int32) Handler {
 
 // NewHandlerMemcacheFromConfiguration creates a memcache handler based on a configuration
 func NewHandlerMemcacheFromConfiguration(c ConfigurationMemcache) Handler {
-	return NewHandlerMemcache(c.Servers, c.Prefix, c.TTL)
+	return NewHandlerMemcache(c.Servers, c.Prefix, time.Duration(c.TTL)*time.Nanosecond)
 }
 
 type handlerMemcache struct {
 	client *memcache.Client
-	handlerBase
+	handler
 }
 
 func (h handlerMemcache) Decrement(key string, delta uint64) (uint64, error) {
@@ -57,7 +59,7 @@ func (h handlerMemcache) Increment(key string, delta uint64) (uint64, error) {
 	return h.client.Increment(h.buildKey(key), delta)
 }
 
-func (h handlerMemcache) Set(key string, value interface{}, ttl int32) error {
+func (h handlerMemcache) Set(key string, value interface{}, ttl time.Duration) error {
 	// Initialize
 	var e error
 
@@ -71,6 +73,6 @@ func (h handlerMemcache) Set(key string, value interface{}, ttl int32) error {
 	return h.client.Set(&memcache.Item{
 		Key:        h.buildKey(key),
 		Value:      v,
-		Expiration: h.buildTTL(ttl),
+		Expiration: int32(h.buildTTL(ttl).Seconds()),
 	})
 }

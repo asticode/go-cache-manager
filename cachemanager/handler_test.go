@@ -7,12 +7,14 @@ package cachemanager
 import (
 	"testing"
 
+	"time"
+
 	"github.com/stretchr/testify/assert"
 )
 
 func TestTransformKey(t *testing.T) {
 	// Initialize
-	h := handlerBase{
+	h := handler{
 		prefix: "prefix_",
 	}
 
@@ -22,13 +24,13 @@ func TestTransformKey(t *testing.T) {
 
 func TestTransformTtl(t *testing.T) {
 	// Initialize
-	h := handlerBase{
-		ttl: 5,
+	h := handler{
+		ttl: time.Duration(5),
 	}
 
 	// Assert
-	assert.Equal(t, int32(5), h.buildTTL(-1))
-	assert.Equal(t, int32(3), h.buildTTL(3))
+	assert.Equal(t, time.Duration(5), h.buildTTL(time.Duration(-1)))
+	assert.Equal(t, time.Duration(3), h.buildTTL(time.Duration(3)))
 }
 
 func TestSerialize(t *testing.T) {
@@ -37,14 +39,14 @@ func TestSerialize(t *testing.T) {
 		"test1": "message1",
 		"test2": "message2",
 	}
-	h := handlerBase{}
+	h := handler{}
 
 	// Encode
 	c, e := h.serialize(d)
 
 	// Assert
 	assert.NoError(t, e)
-	assert.Equal(t, "{\"test1\":\"message1\",\"test2\":\"message2\"}\n", string(c))
+	assert.Equal(t, "\x0e\xff\x81\x04\x01\x02\xff\x82\x00\x01\f\x01\x10\x00\x006\xff\x82\x00\x02\x05test1\x06string\f\n\x00\bmessage1\x05test2\x06string\f\n\x00\bmessage2", string(c))
 
 	// Decode
 	de := make(map[string]interface{})
