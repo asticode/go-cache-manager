@@ -31,7 +31,7 @@ func TestTransformTtl(t *testing.T) {
 	assert.Equal(t, int32(3), h.buildTTL(3))
 }
 
-func TestEncodeDecode(t *testing.T) {
+func TestSerialize(t *testing.T) {
 	// Initialize
 	d := map[string]interface{}{
 		"test1": "message1",
@@ -40,7 +40,7 @@ func TestEncodeDecode(t *testing.T) {
 	h := handlerBase{}
 
 	// Encode
-	c, e := h.Encode(d)
+	c, e := h.serialize(d)
 
 	// Assert
 	assert.NoError(t, e)
@@ -48,7 +48,7 @@ func TestEncodeDecode(t *testing.T) {
 
 	// Decode
 	de := make(map[string]interface{})
-	e = h.Decode(c, &de)
+	e = h.unserialize(c, &de)
 
 	// Assert
 	assert.NoError(t, e)

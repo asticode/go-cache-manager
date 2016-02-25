@@ -5,14 +5,14 @@ import "errors"
 // Vars
 var (
 	ErrInvalidHandler = errors.New("Invalid handler")
-	ErrCacheMiss = errors.New("Cache miss")
+	ErrCacheMiss      = errors.New("Cache miss")
 )
 
 // Manager represents a cache manager capable of switching between several cache handlers
 type Manager interface {
 	AddHandler(n string, h Handler) Manager
 	Del(k string) error
-	Get(k string) ([]byte, error)
+	Get(k string) (interface{}, error)
 	GetHandler(n string) (Handler, error)
 }
 
@@ -44,8 +44,8 @@ func (m manager) Del(k string) error {
 	return e
 }
 
-func (m manager) Get(k string) ([]byte, error) {
-	var o []byte
+func (m manager) Get(k string) (interface{}, error) {
+	var o interface{}
 	var e error
 	for _, h := range m.handlers {
 		o, e = h.Get(k)

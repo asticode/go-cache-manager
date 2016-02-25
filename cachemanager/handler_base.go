@@ -21,7 +21,7 @@ func (h handlerBase) buildTTL(ttl int32) int32 {
 	return ttl
 }
 
-func (h handlerBase) Encode(d interface{}) ([]byte, error) {
+func (h handlerBase) serialize(d interface{}) ([]byte, error) {
 	// Initialize
 	var buffer bytes.Buffer
 
@@ -32,7 +32,7 @@ func (h handlerBase) Encode(d interface{}) ([]byte, error) {
 	return buffer.Bytes(), err
 }
 
-func (h handlerBase) Decode(i []byte, o interface{}) error {
+func (h handlerBase) unserialize(i []byte, o interface{}) error {
 	// Decode
 	dec := json.NewDecoder(bytes.NewBuffer(i))
 	return dec.Decode(o)
