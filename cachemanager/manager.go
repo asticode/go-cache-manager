@@ -4,8 +4,9 @@ import "errors"
 
 // Vars
 var (
-	ErrInvalidHandler = errors.New("Invalid handler")
+	ErrCacheFull = errors.New("Cache full")
 	ErrCacheMiss      = errors.New("Cache miss")
+	ErrInvalidHandler = errors.New("Invalid handler")
 )
 
 // Manager represents a cache manager capable of switching between several cache handlers

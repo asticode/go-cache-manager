@@ -7,13 +7,14 @@ import (
 )
 
 // NewHandlerMemory creates a memory handler
-func NewHandlerMemory(cleanupInterval time.Duration, prefix string, ttl time.Duration) Handler {
+func NewHandlerMemory(cleanupInterval time.Duration, maxSize int64, prefix string, ttl time.Duration) Handler {
 	return &handlerMemory{
 		client: cache.New(1*time.Nanosecond, cleanupInterval),
 		handler: handler{
 			prefix: prefix,
 			ttl:    ttl,
 		},
+		maxSize: maxSize,
 	}
 }
 
@@ -21,6 +22,7 @@ func NewHandlerMemory(cleanupInterval time.Duration, prefix string, ttl time.Dur
 func NewHandlerMemoryFromConfiguration(c ConfigurationMemory) Handler {
 	return NewHandlerMemory(
 		time.Duration(c.CleanupInterval)*time.Nanosecond,
+		c.MaxSize,
 		c.Prefix,
 		time.Duration(c.TTL)*time.Nanosecond,
 	)
@@ -29,6 +31,7 @@ func NewHandlerMemoryFromConfiguration(c ConfigurationMemory) Handler {
 type handlerMemory struct {
 	client *cache.Cache
 	handler
+	maxSize int64
 }
 
 func (h handlerMemory) Decrement(key string, delta uint64) (uint64, error) {
@@ -61,6 +64,11 @@ func (h handlerMemory) Increment(key string, delta uint64) (uint64, error) {
 }
 
 func (h handlerMemory) Set(key string, value interface{}, ttl time.Duration) error {
+	// Check max size
+	if int64(h.client.ItemCount()) >= h.maxSize {
+		return ErrCacheFull
+	}
+
 	// Set
 	h.client.Set(h.buildKey(key), value, h.buildTTL(ttl))
 

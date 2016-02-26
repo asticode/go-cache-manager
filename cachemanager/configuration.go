@@ -13,4 +13,5 @@ type ConfigurationMemcache struct {
 type ConfigurationMemory struct {
 	CleanupInterval int64 `json:"cleanup_interval"`
 	Configuration
+	MaxSize int64 `json:"max_size"`
 }

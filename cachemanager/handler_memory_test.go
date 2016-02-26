@@ -10,6 +10,7 @@ import (
 func TestHandlerMemory(t *testing.T) {
 	// Initialize
 	k := "test"
+	kFail := "test_1"
 	v := map[string]string{
 		"key1": "value1",
 		"key2": "value2",
@@ -20,6 +21,7 @@ func TestHandlerMemory(t *testing.T) {
 		Configuration: Configuration{
 			Prefix: "test_",
 		},
+		MaxSize: 1,
 	}
 	m := NewHandlerMemoryFromConfiguration(c)
 
@@ -53,4 +55,11 @@ func TestHandlerMemory(t *testing.T) {
 	vc, e = m.Get(k)
 	assert.NoError(t, e)
 	assert.Equal(t, uint64(4), vc)
+
+	// Max size
+	m.Del(k)
+	e = m.Set(k, "test", time.Duration(100)*time.Microsecond)
+	assert.NoError(t, e)
+	e = m.Set(kFail, "test", time.Duration(100)*time.Microsecond)
+	assert.EqualError(t, e, ErrCacheFull.Error())
 }
