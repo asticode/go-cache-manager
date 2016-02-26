@@ -35,9 +35,9 @@ func TestTransformTtl(t *testing.T) {
 
 func TestSerialize(t *testing.T) {
 	// Initialize
-	d := map[string]interface{}{
-		"test1": "message1",
-		"test2": "message2",
+	d := []string{
+		"test1",
+		"test2",
 	}
 	h := handler{}
 
@@ -46,10 +46,10 @@ func TestSerialize(t *testing.T) {
 
 	// Assert
 	assert.NoError(t, e)
-	assert.Equal(t, "\x0e\xff\x81\x04\x01\x02\xff\x82\x00\x01\f\x01\x10\x00\x006\xff\x82\x00\x02\x05test1\x06string\f\n\x00\bmessage1\x05test2\x06string\f\n\x00\bmessage2", string(c))
+	assert.Equal(t, "\f\xff\x81\x02\x01\x02\xff\x82\x00\x01\f\x00\x00\x10\xff\x82\x00\x02\x05test1\x05test2", string(c))
 
 	// Decode
-	de := make(map[string]interface{})
+	de := []string{}
 	e = h.unserialize(c, &de)
 
 	// Assert

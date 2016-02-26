@@ -30,7 +30,11 @@ type handlerMemcache struct {
 }
 
 func (h handlerMemcache) Decrement(key string, delta uint64) (uint64, error) {
-	return h.client.Decrement(h.buildKey(key), delta)
+	o, e := h.client.Decrement(h.buildKey(key), delta)
+	if e != nil && e.Error() == memcache.ErrCacheMiss.Error() {
+		return o, ErrCacheMiss
+	}
+	return o, e
 }
 
 func (h handlerMemcache) Del(key string) error {
@@ -44,7 +48,9 @@ func (h handlerMemcache) Get(key string) (interface{}, error) {
 
 	// Get item
 	i, e := h.client.Get(h.buildKey(key))
-	if e != nil {
+	if e != nil && e.Error() == memcache.ErrCacheMiss.Error() {
+		return v, ErrCacheMiss
+	} else if e != nil {
 		return v, e
 	}
 
@@ -56,7 +62,11 @@ func (h handlerMemcache) Get(key string) (interface{}, error) {
 }
 
 func (h handlerMemcache) Increment(key string, delta uint64) (uint64, error) {
-	return h.client.Increment(h.buildKey(key), delta)
+	o, e := h.client.Increment(h.buildKey(key), delta)
+	if e != nil && e.Error() == memcache.ErrCacheMiss.Error() {
+		return o, ErrCacheMiss
+	}
+	return o, e
 }
 
 func (h handlerMemcache) Set(key string, value interface{}, ttl time.Duration) error {

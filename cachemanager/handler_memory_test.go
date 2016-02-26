@@ -24,24 +24,24 @@ func TestHandlerMemory(t *testing.T) {
 	m := NewHandlerMemoryFromConfiguration(c)
 
 	// Set
-	m.Set(k, v, time.Duration(5)*time.Microsecond)
+	m.Set(k, v, time.Duration(100)*time.Microsecond)
 	vc, e := m.Get(k)
 	assert.NoError(t, e)
 	assert.Equal(t, v, vc)
 
 	// Wait for expiration
-	time.Sleep(time.Duration(5) * time.Microsecond)
+	time.Sleep(time.Duration(100) * time.Microsecond)
 	vc, e = m.Get(k)
 	assert.EqualError(t, e, ErrCacheMiss.Error())
 
 	// Del
-	m.Set(k, v, time.Duration(5)*time.Microsecond)
+	m.Set(k, v, time.Duration(100)*time.Microsecond)
 	m.Del(k)
 	vc, e = m.Get(k)
 	assert.EqualError(t, e, ErrCacheMiss.Error())
 
 	// Increment
-	m.Set(k, uint64(5), time.Duration(20)*time.Microsecond)
+	m.Set(k, uint64(5), time.Duration(100)*time.Microsecond)
 	_, e = m.Increment(k, 1)
 	assert.NoError(t, e)
 	vc, e = m.Get(k)
