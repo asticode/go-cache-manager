@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/bradfitz/gomemcache/memcache"
+	"reflect"
 )
 
 // NewHandlerMemcache creates a memcache handler
@@ -57,7 +58,15 @@ func (h handlerMemcache) Get(key string, value interface{}) error {
 	if _, ok := value.(*[]byte); !ok {
 		e = h.unserialize(i.Value, value)
 	} else {
-		value = i
+		// Reflect
+		rv := reflect.ValueOf(value)
+		if rv.Kind() != reflect.Ptr {
+			return ErrInvalidInputPointer
+		}
+		ri := reflect.ValueOf(i.Value)
+
+		// Set
+		rv.Elem().Set(ri)
 	}
 
 	// Return
