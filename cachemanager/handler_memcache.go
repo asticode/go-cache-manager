@@ -41,24 +41,27 @@ func (h handlerMemcache) Del(key string) error {
 	return h.client.Delete(h.buildKey(key))
 }
 
-func (h handlerMemcache) Get(key string) (interface{}, error) {
+func (h handlerMemcache) Get(key string, value interface{}) error {
 	// Initialize
-	var v interface{}
 	var e error
 
 	// Get item
 	i, e := h.client.Get(h.buildKey(key))
 	if e != nil && e.Error() == memcache.ErrCacheMiss.Error() {
-		return v, ErrCacheMiss
+		return ErrCacheMiss
 	} else if e != nil {
-		return v, e
+		return e
 	}
 
 	// Unserialize
-	e = h.unserialize(i.Value, &v)
+	if _, ok := value.([]byte); !ok {
+		e = h.unserialize(i.Value, value)
+	} else {
+		value = i
+	}
 
 	// Return
-	return v, e
+	return e
 }
 
 func (h handlerMemcache) Increment(key string, delta uint64) (uint64, error) {
@@ -72,11 +75,16 @@ func (h handlerMemcache) Increment(key string, delta uint64) (uint64, error) {
 func (h handlerMemcache) Set(key string, value interface{}, ttl time.Duration) error {
 	// Initialize
 	var e error
+	var v []byte
 
 	// Serialize
-	v, e := h.serialize(value)
-	if e != nil {
-		return e
+	if _, ok:= value.([]byte); !ok {
+		v, e = h.serialize(value)
+		if e != nil {
+			return e
+		}
+	} else {
+		v = value.([]byte)
 	}
 
 	// Return

@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/patrickmn/go-cache"
+	"reflect"
 )
 
 // NewHandlerMemory creates a memory handler
@@ -46,16 +47,27 @@ func (h handlerMemory) Del(key string) error {
 	return nil
 }
 
-func (h handlerMemory) Get(key string) (interface{}, error) {
+func (h handlerMemory) Get(key string, value interface{}) error {
 	// Get value
-	v, ok := h.client.Get(h.buildKey(key))
+	i, ok := h.client.Get(h.buildKey(key))
+
+	// Cache miss
+	if !ok {
+		return ErrCacheMiss
+	}
+
+	// Reflect
+	rv := reflect.ValueOf(value)
+	if rv.Kind() != reflect.Ptr {
+		return ErrInvalidInputPointer
+	}
+	ri := reflect.ValueOf(i)
+
+	// Set
+	rv.Elem().Set(ri)
 
 	// Return
-	if ok {
-		return v, nil
-	} else {
-		return nil, ErrCacheMiss
-	}
+	return nil
 }
 
 func (h handlerMemory) Increment(key string, delta uint64) (uint64, error) {
