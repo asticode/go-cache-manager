@@ -11,6 +11,7 @@ type Handler interface {
 	Del(k string) error
 	Get(k string) (interface{}, error)
 	Increment(key string, delta uint64) (uint64, error)
+	SetOnEvicted(f func (k string, v interface{})) Handler
 	Set(k string, v interface{}, ttl time.Duration) error
 }
 

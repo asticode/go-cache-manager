@@ -86,3 +86,7 @@ func (h handlerMemcache) Set(key string, value interface{}, ttl time.Duration) e
 		Expiration: int32(h.buildTTL(ttl).Seconds()),
 	})
 }
+
+func (h handlerMemcache) SetOnEvicted(f func (k string, v interface{})) Handler {
+	panic("not yet implemented")
+}

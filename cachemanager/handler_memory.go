@@ -75,3 +75,8 @@ func (h handlerMemory) Set(key string, value interface{}, ttl time.Duration) err
 	// Return
 	return nil
 }
+
+func (h handlerMemory) SetOnEvicted(f func (k string, v interface{})) Handler {
+	h.client.OnEvicted(f)
+	return h
+}
