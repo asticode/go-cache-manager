@@ -54,7 +54,7 @@ func (h handlerMemcache) Get(key string, value interface{}) error {
 	}
 
 	// Unserialize
-	if _, ok := value.([]byte); !ok {
+	if _, ok := value.(*[]byte); !ok {
 		e = h.unserialize(i.Value, value)
 	} else {
 		value = i
