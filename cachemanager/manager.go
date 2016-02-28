@@ -16,6 +16,7 @@ type Manager interface {
 	Del(k string) error
 	Get(k string) (interface{}, error)
 	GetHandler(n string) (Handler, error)
+	Test() map[string]error
 }
 
 // NewManager creates a new cache manager
@@ -65,4 +66,17 @@ func (m manager) GetHandler(n string) (Handler, error) {
 		return h, e
 	}
 	return nil, ErrInvalidHandler
+}
+
+func (m manager) Test() map[string]error {
+	// Initialize
+	o := make(map[string]error)
+
+	// Loop through handlers
+	for name, h := range m.handlers {
+		o[name] = h.Test()
+	}
+
+	// Return
+	return o
 }

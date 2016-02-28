@@ -83,3 +83,18 @@ func (h handlerMemcache) Set(key string, value interface{}, ttl time.Duration) e
 func (h handlerMemcache) SetOnEvicted(f func(k string, v interface{})) Handler {
 	panic("not yet implemented")
 }
+
+func (h handlerMemcache) Test() error {
+	// Initialize
+	var e error
+	k := "test"
+
+	// Set
+	e = h.Set(k, []byte("1"), 1)
+	if e != nil {
+		return e
+	}
+
+	// Return
+	return h.Del(k)
+}

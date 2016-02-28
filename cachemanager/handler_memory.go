@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/patrickmn/go-cache"
+	"strings"
 )
 
 // NewHandlerMemory creates a memory handler
@@ -35,7 +36,11 @@ type handlerMemory struct {
 }
 
 func (h handlerMemory) Decrement(key string, delta uint64) (uint64, error) {
-	return h.client.DecrementUint64(h.buildKey(key), delta)
+	o, e := h.client.DecrementUint64(h.buildKey(key), delta)
+	if e != nil && strings.Contains(e.Error(), " not found") {
+		return o, ErrCacheMiss
+	}
+	return o, e
 }
 
 func (h handlerMemory) Del(key string) error {
@@ -61,8 +66,11 @@ func (h handlerMemory) Get(key string) (interface{}, error) {
 }
 
 func (h handlerMemory) Increment(key string, delta uint64) (uint64, error) {
-
-	return h.client.IncrementUint64(h.buildKey(key), delta)
+	o, e := h.client.IncrementUint64(h.buildKey(key), delta)
+	if e != nil && strings.Contains(e.Error(), " not found") {
+		return o, ErrCacheMiss
+	}
+	return o, e
 }
 
 func (h handlerMemory) Set(key string, value interface{}, ttl time.Duration) error {
@@ -81,4 +89,19 @@ func (h handlerMemory) Set(key string, value interface{}, ttl time.Duration) err
 func (h handlerMemory) SetOnEvicted(f func(k string, v interface{})) Handler {
 	h.client.OnEvicted(f)
 	return h
+}
+
+func (h handlerMemory) Test() error {
+	// Initialize
+	var e error
+	k := "test"
+
+	// Set
+	e = h.Set(k, []byte("1"), 1)
+	if e != nil {
+		return e
+	}
+
+	// Return
+	return h.Del(k)
 }
