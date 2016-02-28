@@ -43,19 +43,19 @@ func (h handlerMemcache) Del(key string) error {
 
 func (h handlerMemcache) Get(key string) (interface{}, error) {
 	// Initialize
-	var i interface{}
+	var o interface{}
 	var e error
 
 	// Get item
-	i, e = h.client.Get(h.buildKey(key))
+	i, e := h.client.Get(h.buildKey(key))
 	if e != nil && e.Error() == memcache.ErrCacheMiss.Error() {
-		return i, ErrCacheMiss
+		return o, ErrCacheMiss
 	} else if e != nil {
-		return i, e
+		return o, e
 	}
 
 	// Return
-	return i, e
+	return i.Value, e
 }
 
 func (h handlerMemcache) Increment(key string, delta uint64) (uint64, error) {

@@ -7,11 +7,14 @@ import (
 
 func ToBytes(d interface{}) ([]byte, error) {
 	// Initialize
+	var err error
 	var buffer bytes.Buffer
 
 	// Encode
-	enc := gob.NewEncoder(&buffer)
-	err := enc.Encode(d)
+	if d != nil {
+		enc := gob.NewEncoder(&buffer)
+		err = enc.Encode(d)
+	}
 
 	return buffer.Bytes(), err
 }
