@@ -9,7 +9,6 @@ import (
 
 func TestHandlerMemory(t *testing.T) {
 	// Initialize
-	var ic uint64
 	k := "test"
 	kFail := "test_1"
 	v := map[string]string{
@@ -17,7 +16,6 @@ func TestHandlerMemory(t *testing.T) {
 		"key2": "value2",
 		"key3": "value3",
 	}
-	vc := make(map[string]string)
 	c := ConfigurationMemory{
 		CleanupInterval: 500,
 		Configuration: Configuration{
@@ -29,32 +27,32 @@ func TestHandlerMemory(t *testing.T) {
 
 	// Set
 	m.Set(k, v, time.Duration(100)*time.Microsecond)
-	e := m.Get(k, &vc)
+	vc, e := m.Get(k)
 	assert.NoError(t, e)
 	assert.Equal(t, v, vc)
 
 	// Wait for expiration
 	time.Sleep(time.Duration(100) * time.Microsecond)
-	e = m.Get(k, &vc)
+	vc, e = m.Get(k)
 	assert.EqualError(t, e, ErrCacheMiss.Error())
 
 	// Del
 	m.Set(k, v, time.Duration(100)*time.Microsecond)
 	m.Del(k)
-	e = m.Get(k, &vc)
+	vc, e = m.Get(k)
 	assert.EqualError(t, e, ErrCacheMiss.Error())
 
 	// Increment
 	m.Set(k, uint64(5), time.Duration(100)*time.Microsecond)
 	_, e = m.Increment(k, 1)
 	assert.NoError(t, e)
-	e = m.Get(k, &ic)
+	ic, e := m.Get(k)
 	assert.NoError(t, e)
 	assert.Equal(t, uint64(6), ic)
 
 	// Decrement
 	m.Decrement(k, 2)
-	e = m.Get(k, &ic)
+	ic, e = m.Get(k)
 	assert.NoError(t, e)
 	assert.Equal(t, uint64(4), ic)
 

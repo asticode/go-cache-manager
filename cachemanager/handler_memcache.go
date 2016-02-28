@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/bradfitz/gomemcache/memcache"
-	"reflect"
 )
 
 // NewHandlerMemcache creates a memcache handler
@@ -42,35 +41,21 @@ func (h handlerMemcache) Del(key string) error {
 	return h.client.Delete(h.buildKey(key))
 }
 
-func (h handlerMemcache) Get(key string, value interface{}) error {
+func (h handlerMemcache) Get(key string) (interface{}, error) {
 	// Initialize
+	var i interface{}
 	var e error
 
 	// Get item
-	i, e := h.client.Get(h.buildKey(key))
+	i, e = h.client.Get(h.buildKey(key))
 	if e != nil && e.Error() == memcache.ErrCacheMiss.Error() {
-		return ErrCacheMiss
+		return i, ErrCacheMiss
 	} else if e != nil {
-		return e
-	}
-
-	// Unserialize
-	if _, ok := value.(*[]byte); !ok {
-		e = h.unserialize(i.Value, value)
-	} else {
-		// Reflect
-		rv := reflect.ValueOf(value)
-		if rv.Kind() != reflect.Ptr {
-			return ErrInvalidInputPointer
-		}
-		ri := reflect.ValueOf(i.Value)
-
-		// Set
-		rv.Elem().Set(ri)
+		return i, e
 	}
 
 	// Return
-	return e
+	return i, e
 }
 
 func (h handlerMemcache) Increment(key string, delta uint64) (uint64, error) {
@@ -82,28 +67,19 @@ func (h handlerMemcache) Increment(key string, delta uint64) (uint64, error) {
 }
 
 func (h handlerMemcache) Set(key string, value interface{}, ttl time.Duration) error {
-	// Initialize
-	var e error
-	var v []byte
-
-	// Serialize
-	if _, ok:= value.([]byte); !ok {
-		v, e = h.serialize(value)
-		if e != nil {
-			return e
-		}
-	} else {
-		v = value.([]byte)
+	// Check value is a slice of bytes
+	if _, ok := value.([]byte); !ok {
+		return ErrInputMustBeASliceOfBytes
 	}
 
 	// Return
 	return h.client.Set(&memcache.Item{
 		Key:        h.buildKey(key),
-		Value:      v,
+		Value:      value.([]byte),
 		Expiration: int32(h.buildTTL(ttl).Seconds()),
 	})
 }
 
-func (h handlerMemcache) SetOnEvicted(f func (k string, v interface{})) Handler {
+func (h handlerMemcache) SetOnEvicted(f func(k string, v interface{})) Handler {
 	panic("not yet implemented")
 }

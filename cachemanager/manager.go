@@ -4,17 +4,17 @@ import "errors"
 
 // Vars
 var (
-	ErrCacheFull = errors.New("Cache full")
-	ErrCacheMiss      = errors.New("Cache miss")
-	ErrInvalidHandler = errors.New("Invalid handler")
-	ErrInvalidInputPointer = errors.New("Input must be a pointer")
+	ErrCacheFull                = errors.New("Cache full")
+	ErrCacheMiss                = errors.New("Cache miss")
+	ErrInvalidHandler           = errors.New("Invalid handler")
+	ErrInputMustBeASliceOfBytes = errors.New("Input must be a slice of bytes")
 )
 
 // Manager represents a cache manager capable of switching between several cache handlers
 type Manager interface {
 	AddHandler(n string, h Handler) Manager
 	Del(k string) error
-	Get(k string, v interface{}) error
+	Get(k string) (interface{}, error)
 	GetHandler(n string) (Handler, error)
 }
 
@@ -46,15 +46,16 @@ func (m manager) Del(k string) error {
 	return e
 }
 
-func (m manager) Get(k string, v interface{}) error {
+func (m manager) Get(k string) (interface{}, error) {
+	var v interface{}
 	var e error
 	for _, h := range m.handlers {
-		e = h.Get(k, v)
+		v, e = h.Get(k)
 		if e == nil || (e != nil && e.Error() != ErrCacheMiss.Error()) {
-			return e
+			return v, e
 		}
 	}
-	return e
+	return v, e
 }
 
 // GetHandler returns the handler
