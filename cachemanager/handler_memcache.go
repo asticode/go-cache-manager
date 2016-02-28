@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/bradfitz/gomemcache/memcache"
+	"strconv"
 )
 
 // NewHandlerMemcache creates a memcache handler
@@ -67,15 +68,24 @@ func (h handlerMemcache) Increment(key string, delta uint64) (uint64, error) {
 }
 
 func (h handlerMemcache) Set(key string, value interface{}, ttl time.Duration) error {
+	// Initialize
+	var v []byte
+
 	// Check value is a slice of bytes
 	if _, ok := value.([]byte); !ok {
-		return ErrInputMustBeASliceOfBytes
+		if _, ok := value.(uint64); ok {
+			v = []byte(strconv.Itoa(int(value.(uint64))))
+		} else {
+			return ErrInputMustBeASliceOfBytes
+		}
+	} else {
+		v = value.([]byte)
 	}
 
 	// Return
 	return h.client.Set(&memcache.Item{
 		Key:        h.buildKey(key),
-		Value:      value.([]byte),
+		Value:      v,
 		Expiration: int32(h.buildTTL(ttl).Seconds()),
 	})
 }
