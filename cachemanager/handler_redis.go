@@ -16,6 +16,12 @@ func NewHandlerRedis(redisConfig *redis.Options, prefix string, ttl time.Duratio
 	}
 }
 
+func NewHandlerRedisFromConfiguration(conf *ConfigurationRedis) Handler {
+	return NewHandlerRedis(&redis.Options{
+		Addr:         conf.Addr,
+	}, conf.Prefix, time.Duration(conf.TTL))
+}
+
 type handlerRedis struct {
 	client *redis.Client
 	handler
