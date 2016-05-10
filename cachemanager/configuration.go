@@ -15,3 +15,8 @@ type ConfigurationMemory struct {
 	Configuration
 	MaxSize int64 `json:"max_size"`
 }
+
+type ConfigurationRedis struct {
+	Configuration
+	Addr string `json:"addr"`
+}
