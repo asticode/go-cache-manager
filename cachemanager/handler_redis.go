@@ -75,5 +75,16 @@ func (h handlerRedis) SetOnEvicted(f func(k string, v interface{})) Handler {
 }
 
 func (h handlerRedis) Test() error {
-	panic("not yet implemented")
+	// Initialize
+	var e error
+	k := "test"
+
+	// Set
+	e = h.Set(k, "1", 1)
+	if e != nil {
+		return e
+	}
+
+	// Return
+	return h.Del(k)
 }
