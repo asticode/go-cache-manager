@@ -80,7 +80,7 @@ func (h handlerRedis) Test() error {
 	k := "test"
 
 	// Set
-	e = h.Set(k, "1", 1)
+	e = h.Set(k, "1", time.Second)
 	if e != nil {
 		return e
 	}
