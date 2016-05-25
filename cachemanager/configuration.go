@@ -20,3 +20,8 @@ type ConfigurationRedis struct {
 	Configuration
 	Addr string `json:"addr"`
 }
+
+type ConfigurationRedisCluster struct {
+	Configuration
+	Addrs []string `json:"addrs"`
+}
