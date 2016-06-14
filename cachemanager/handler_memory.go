@@ -3,8 +3,9 @@ package cachemanager
 import (
 	"time"
 
-	"github.com/patrickmn/go-cache"
 	"strings"
+
+	"github.com/patrickmn/go-cache"
 )
 
 // NewHandlerMemory creates a memory handler

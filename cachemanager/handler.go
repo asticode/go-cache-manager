@@ -30,7 +30,7 @@ func (h handler) buildTTL(ttl time.Duration) time.Duration {
 
 func MockHandler() Handler {
 	return NewHandlerMemory(
-		time.Duration(500) * time.Nanosecond,
+		time.Duration(500)*time.Nanosecond,
 		200,
 		"mocked_handler:",
 		-1,

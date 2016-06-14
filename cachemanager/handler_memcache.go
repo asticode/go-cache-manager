@@ -5,8 +5,9 @@ import (
 
 	"time"
 
-	"github.com/bradfitz/gomemcache/memcache"
 	"strconv"
+
+	"github.com/bradfitz/gomemcache/memcache"
 )
 
 // NewHandlerMemcache creates a memcache handler
